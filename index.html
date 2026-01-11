@@ -64,7 +64,7 @@
 
   <div id="result"></div>
 
-  <!-- 🔹 FILMDATA LADDAS HÄR -->
+  <!-- 🔹 Filmdatabasen -->
   <script src="movies.js"></script>
 
   <script>
@@ -138,8 +138,15 @@
       }
     });
 
-    // Start
-    newQuestion();
+    // ====== SÄKER START ======
+    window.addEventListener("load", function () {
+      if (!Array.isArray(movies) || movies.length === 0) {
+        document.getElementById("question").textContent =
+          "❌ Filmlistan kunde inte laddas";
+        return;
+      }
+      newQuestion();
+    });
   </script>
 
 </body>
