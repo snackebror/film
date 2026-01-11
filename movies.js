@@ -1,5 +1,3 @@
-Js
-
 const movies = [
   { title: "The Shawshank Redemption", year: 1994 },
   { title: "The Godfather", year: 1972 },
