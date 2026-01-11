@@ -3,151 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Filmer – årtal</title>
-
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      max-width: 420px;
-      margin: auto;
-      padding: 2rem;
-      text-align: center;
-    }
-
-    #question {
-      font-size: 1.8rem;
-      margin: 1.5rem 0;
-      font-weight: bold;
-    }
-
-    .answer-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 0.8rem;
-    }
-
-    input {
-      font-size: 1.2rem;
-      padding: 0.6rem;
-      text-align: center;
-    }
-
-    button {
-      font-size: 1.2rem;
-      padding: 0.6rem 1.2rem;
-    }
-
-    #result {
-      margin-top: 1rem;
-      font-weight: bold;
-      min-height: 1.5em;
-    }
-  </style>
+  <title>Filmår</title>
 </head>
-
 <body>
 
-  <div id="question"></div>
+<h2 id="question">Laddar…</h2>
 
-  <div class="answer-row">
-    <input
-      id="answer"
-      type="text"
-      inputmode="numeric"
-      pattern="[0-9]*"
-      placeholder="Årtal"
-      size="6"
-    >
-    <button onclick="check()">Svar</button>
-  </div>
+<input id="answer" type="number" placeholder="Årtal">
+<button id="btn">Svar</button>
 
-  <div id="result"></div>
+<p id="result"></p>
 
-  <!-- 🔹 Filmdatabasen -->
-  <script src="movies.js"></script>
+<script src="movies.js"></script>
 
-  <script>
-    // ====== SPELLOGIK ======
-    let current = null;
-    let lastAsked = null;
-    let mistakes = [];
-    let repeatQueue = [];
+<script>
+  // SÄKER KONTROLL
+  if (!window.movies) {
+    document.getElementById("question").textContent =
+      "❌ movies.js laddades inte";
+  } else {
+    document.getElementById("question").textContent =
+      movies[0].title;
+  }
 
-    function getRandomMovie() {
-      let m;
-      do {
-        m = movies[Math.floor(Math.random() * movies.length)];
-      } while (m === lastAsked);
-      return m;
-    }
-
-    function getNextMovie() {
-      if (repeatQueue.length > 0) {
-        if (repeatQueue[0] === lastAsked && repeatQueue.length > 1) {
-          return repeatQueue.splice(1, 1)[0];
-        }
-        if (repeatQueue[0] !== lastAsked) {
-          return repeatQueue.shift();
-        }
-      }
-      return getRandomMovie();
-    }
-
-    function newQuestion() {
-      current = getNextMovie();
-      lastAsked = current;
-
-      document.getElementById("question").textContent = current.title;
-      document.getElementById("answer").value = "";
-      document.getElementById("result").textContent = "";
-      document.getElementById("answer").focus();
-    }
-
-    function check() {
-      const input = document.getElementById("answer").value.trim();
-      if (input === "") return;
-
-      const year = parseInt(input, 10);
-      const diff = Math.abs(year - current.year);
-
-      if (year === current.year) {
-        document.getElementById("result").textContent = "✅ Korrekt!";
-      } else if (diff === 1) {
-        document.getElementById("result").textContent =
-          "🟡 Nästan rätt! Rätt år är " + current.year;
-        mistakes.push(current);
-      } else {
-        document.getElementById("result").textContent =
-          "❌ Fel – rätt år är " + current.year;
-        mistakes.push(current);
-      }
-
-      if (mistakes.length === 5 && repeatQueue.length === 0) {
-        repeatQueue = mistakes.slice();
-        mistakes = [];
-      }
-
-      setTimeout(newQuestion, 1600);
-    }
-
-    // Enter-tangent (Android + desktop)
-    document.getElementById("answer").addEventListener("keydown", function (e) {
-      if (e.key === "Enter" && this.value.trim() !== "") {
-        check();
-      }
-    });
-
-    // ====== SÄKER START ======
-    window.addEventListener("load", function () {
-      if (!Array.isArray(movies) || movies.length === 0) {
-        document.getElementById("question").textContent =
-          "❌ Filmlistan kunde inte laddas";
-        return;
-      }
-      newQuestion();
-    });
-  </script>
+  document.getElementById("btn").addEventListener("click", function () {
+    const input = document.getElementById("answer").value;
+    document.getElementById("result").textContent =
+      "Du skrev: " + input;
+  });
+</script>
 
 </body>
 </html>
