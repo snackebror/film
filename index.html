@@ -18,7 +18,7 @@
 
 <script>
   // SÄKER KONTROLL
-  if (!window.movies) {
+  if (typeof movies === "undefined") {
     document.getElementById("question").textContent =
       "❌ movies.js laddades inte";
   } else {
