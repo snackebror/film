@@ -4,60 +4,144 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Filmår</title>
+
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 420px;
+      margin: auto;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    #question {
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+      font-weight: bold;
+    }
+
+    input {
+      font-size: 1.2rem;
+      padding: 0.5rem;
+      width: 120px;
+      text-align: center;
+    }
+
+    button {
+      font-size: 1.2rem;
+      padding: 0.5rem 1rem;
+      margin-left: 0.5rem;
+    }
+
+    #result {
+      margin-top: 1rem;
+      min-height: 1.5em;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
 
-<h2 id="question">Laddar…</h2>
+  <div id="question">Laddar…</div>
 
-<input
-  id="answer"
-  type="number"
-  placeholder="Årtal"
-  inputmode="numeric"
-/>
+  <div>
+    <input
+      id="answer"
+      type="number"
+      inputmode="numeric"
+      placeholder="Årtal"
+    >
+    <button id="btn">Svar</button>
+  </div>
 
-<button id="btn">Svar</button>
+  <div id="result"></div>
 
-<p id="result"></p>
+  <!-- Filmlista -->
+  <script src="/film/movies.js"></script>
 
-<!-- LADDAR FILMLISTAN -->
-<script src="/film/movies.js"></script>
+  <script>
+    let currentMovie = null;
+    let lastMovie = null;
 
-<script>
-  // Kontroll att movies finns
-  if (typeof movies === "undefined") {
-    document.getElementById("question").textContent =
-      "❌ movies.js laddades inte";
-  } else {
-    document.getElementById("question").textContent =
-      movies[0].title;
-  }
+    let mistakes = [];
+    let repeatQueue = [];
 
-  function submitAnswer() {
-    const inputEl = document.getElementById("answer");
-    const value = inputEl.value.trim();
+    function getRandomMovie() {
+      let movie;
+      do {
+        movie = movies[Math.floor(Math.random() * movies.length)];
+      } while (movie === lastMovie);
+      return movie;
+    }
 
-    // Gör inget om fältet är tomt
-    if (value === "") return;
-
-    document.getElementById("result").textContent =
-      "Du skrev: " + value;
-
-    inputEl.value = "";
-  }
-
-  // Klick på knapp
-  document.getElementById("btn")
-    .addEventListener("click", submitAnswer);
-
-  // ENTER på tangentbord (Android + desktop)
-  document.getElementById("answer")
-    .addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        submitAnswer();
+    function getNextMovie() {
+      if (repeatQueue.length > 0) {
+        let next = repeatQueue.shift();
+        if (next === lastMovie && repeatQueue.length > 0) {
+          next = repeatQueue.shift();
+        }
+        return next;
       }
-    });
-</script>
+      return getRandomMovie();
+    }
+
+    function newQuestion() {
+      currentMovie = getNextMovie();
+      lastMovie = currentMovie;
+
+      document.getElementById("question").textContent =
+        currentMovie.title;
+      document.getElementById("answer").value = "";
+      document.getElementById("result").textContent = "";
+      document.getElementById("answer").focus();
+    }
+
+    function submitAnswer() {
+      const inputEl = document.getElementById("answer");
+      const value = inputEl.value.trim();
+      if (value === "") return;
+
+      const guess = parseInt(value, 10);
+      const correct = currentMovie.year;
+      const diff = Math.abs(guess - correct);
+
+      if (guess === correct) {
+        document.getElementById("result").textContent = "✅ Rätt!";
+      } else if (diff === 1) {
+        document.getElementById("result").textContent =
+          "🟡 Nästan rätt! Rätt år är " + correct;
+        mistakes.push(currentMovie);
+      } else {
+        document.getElementById("result").textContent =
+          "❌ Fel. Rätt år är " + correct;
+        mistakes.push(currentMovie);
+      }
+
+      if (mistakes.length === 5 && repeatQueue.length === 0) {
+        repeatQueue = mistakes.slice();
+        mistakes = [];
+      }
+
+      newQuestion();
+    }
+
+    document.getElementById("btn")
+      .addEventListener("click", submitAnswer);
+
+    document.getElementById("answer")
+      .addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && this.value.trim() !== "") {
+          submitAnswer();
+        }
+      });
+
+    if (typeof movies === "undefined" || movies.length === 0) {
+      document.getElementById("question").textContent =
+        "❌ Filmlistan kunde inte laddas";
+    } else {
+      newQuestion();
+    }
+  </script>
 
 </body>
 </html>
