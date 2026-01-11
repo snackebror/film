@@ -9,15 +9,22 @@
 
 <h2 id="question">Laddar…</h2>
 
-<input id="answer" type="number" placeholder="Årtal">
+<input
+  id="answer"
+  type="number"
+  placeholder="Årtal"
+  inputmode="numeric"
+/>
+
 <button id="btn">Svar</button>
 
 <p id="result"></p>
 
+<!-- LADDAR FILMLISTAN -->
 <script src="/film/movies.js"></script>
 
 <script>
-  // KORREKT KONTROLL
+  // Kontroll att movies finns
   if (typeof movies === "undefined") {
     document.getElementById("question").textContent =
       "❌ movies.js laddades inte";
@@ -26,11 +33,30 @@
       movies[0].title;
   }
 
-  document.getElementById("btn").addEventListener("click", function () {
-    const input = document.getElementById("answer").value;
+  function submitAnswer() {
+    const inputEl = document.getElementById("answer");
+    const value = inputEl.value.trim();
+
+    // Gör inget om fältet är tomt
+    if (value === "") return;
+
     document.getElementById("result").textContent =
-      "Du skrev: " + input;
-  });
+      "Du skrev: " + value;
+
+    inputEl.value = "";
+  }
+
+  // Klick på knapp
+  document.getElementById("btn")
+    .addEventListener("click", submitAnswer);
+
+  // ENTER på tangentbord (Android + desktop)
+  document.getElementById("answer")
+    .addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        submitAnswer();
+      }
+    });
 </script>
 
 </body>
